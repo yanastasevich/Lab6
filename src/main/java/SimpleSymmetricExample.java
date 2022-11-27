@@ -1,12 +1,9 @@
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.Security;
+import java.security.*;
 import java.util.Arrays;
 
 
@@ -20,35 +17,42 @@ public class SimpleSymmetricExample {
         byte[] input = Utils.hexStringToByteArray("0f54bbe30797778ca31d2b4280ea1e780eb7282cd3014b095206d5906e36ba1cff633565e879f949ae4c14cce2532716");
 
         System.out.println("input: " + input);
-        byte[] keyBytes = convertPlaintextToHexadecimal("Computergrafik");
+        byte[] keyBytes = encodeKeys("Computergrafik");
 
-        System.out.println("key: " + keyBytes.length);
-        //TODO: go into classes
+        // System.out.println("key: " + keyBytes.length);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
-        System.out.println("key key spec: " + key);
+        // System.out.println("key key spec: " + key);
 
         // done by Yana
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 
-        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+//        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+//
+//        cipher.init(Cipher.ENCRYPT_MODE, key);
 
-        System.out.println("kwwy text : " + Utils.toHex(keyBytes));
 
-        System.out.println("input text : " + Utils.toHex(input));
+        // System.out.println("key text : " + Utils.toHex(keyBytes));
+
+        // System.out.println("input text : " + Utils.toHex(input));
+
+        String result = decrypt(input, input, key);
+        System.out.println("result: " + result);
 
         // encryption pass
 
-        String cipherText = encrypt(input, cipher, key);
+        String cipherText = encrypt(input, key);
         System.out.println("encryption: " + cipherText);
 
         // decryption pass
 
-        String plainText = decrypt(cipher, input, cipherText.getBytes(StandardCharsets.UTF_8), key);
+        String plainText = decrypt(input, cipherText.getBytes(StandardCharsets.UTF_8), key);
         System.out.println("decryption: " + plainText);
     }
 
-    private static String encrypt(byte[] input, Cipher cipher, SecretKeySpec key) throws InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+    private static String encrypt(byte[] input, SecretKeySpec key) throws InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+
         byte[] cipherText = new byte[input.length];
 
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -63,18 +67,19 @@ public class SimpleSymmetricExample {
         return Utils.toHex(cipherText);
     }
 
-    private static String decrypt(Cipher cipher, byte[] input, byte[] cipherText, SecretKeySpec key) throws ShortBufferException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        int cipherTextLength = getCipherLength(cipher, input, cipherText);
-        byte[] plainText = new byte[cipherTextLength];
+    private static String decrypt(byte[] input, byte[] cipherText, SecretKeySpec key) throws ShortBufferException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+
+        int ctLength = getCipherLength(cipher, input, cipherText);
+        byte[] plainText = new byte[ctLength];
 
         cipher.init(Cipher.DECRYPT_MODE, key);
 
-        int ptLength = cipher.update(cipherText, 0, cipherTextLength, plainText, 0);
+        int ptLength = cipher.update(cipherText, 0, ctLength, plainText, 0);
 
         ptLength += cipher.doFinal(plainText, ptLength);
 
         System.out.println("plain text : " + Utils.toHex(plainText) + " bytes: " + ptLength);
-
         return Utils.toHex(plainText);
     }
 
@@ -82,7 +87,11 @@ public class SimpleSymmetricExample {
         return cipher.update(input, 0, input.length, cipherText, 0);
     }
 
-    // TODO: write a function that convert letters to hexadecimal convertiert
+    public static byte[] encodeKeys(String key) throws NoSuchAlgorithmException {
+        Charset charset = StandardCharsets.US_ASCII;
+        MessageDigest keySHA256 = MessageDigest.getInstance("SHA-256");
+        return keySHA256.digest(key.getBytes(charset));
+    }
 
 
     public static byte[] convertPlaintextToHexadecimal(String plaintext) {
@@ -92,8 +101,7 @@ public class SimpleSymmetricExample {
         for (char character : characterList) {
             cipherText.append(Integer.toHexString(character));
         }
-        System.out.println("Da result"+cipherText.toString());
+        System.out.println("Da result" + cipherText.toString());
         return Utils.hexStringToByteArray(cipherText.toString());
     }
-
 }

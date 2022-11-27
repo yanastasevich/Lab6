@@ -13,13 +13,13 @@ public class Utils {
      * @return a hex representation of length bytes of data.
      */
     public static String toHex(byte[] data, int length) {
-        System.out.println("To HEX STARTED");
+        // System.out.println("To HEX STARTED");
         StringBuffer buf = new StringBuffer();
 
         for (int i = 0; i != length; i++) {
 
             int v = data[i] & 0xff;
-            System.out.println("Appending " + digits.charAt(v >> 4) + digits.charAt(v & 0xf) + " from " + data[i] + "(" + v + ")");
+            //System.out.println("Appending " + digits.charAt(v >> 4) + digits.charAt(v & 0xf) + " from " + data[i] + "(" + v + ")");
 
             buf.append(digits.charAt(v >> 4));
             buf.append(digits.charAt(v & 0xf));
@@ -34,15 +34,11 @@ public class Utils {
         byte[] hexaBytes = new byte[length];
 
         for (int i = 0; i != length; i++) {
-
-
             String hex = String.format("%04x", (int) buf.charAt(i));
             hexaBytes[i] = 0;
             int v = buf.charAt(i) & 0xff;
             System.out.println("Appending " + hex + " from " + buf.charAt(i) + "(" + v + ")");
-
         }
-
         return hexaBytes;
     }
 
