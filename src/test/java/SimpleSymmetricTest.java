@@ -5,28 +5,13 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SimpleSymmetricExampleTest {
-
-
-    @ParameterizedTest
-    @CsvSource({"plainText"})
-    public void testConvertToHexadecimal(String plainText){
-
-        String expectedMessage = Utils.toHex("706c61696e54657874".getBytes(StandardCharsets.UTF_8));
-        String actualMessage = Utils.toHex(SimpleSymmetricExample.convertPlaintextToHexadecimal(plainText));
-
-        assertTrue(actualMessage.contains(expectedMessage),
-                "Actual plain text: " + expectedMessage + " contains expected plain text: " +
-                        actualMessage);
-    }
+public class SimpleSymmetricTest {
 
     @ParameterizedTest
     @CsvSource({"celebration"})
@@ -36,8 +21,10 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        System.out.println("expected plain text " + expectedPlaintext);
+
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -48,8 +35,8 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -60,8 +47,8 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -72,8 +59,8 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -84,8 +71,8 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -96,8 +83,8 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 
     @ParameterizedTest
@@ -108,7 +95,7 @@ public class SimpleSymmetricExampleTest {
         String cipherText = SimpleSymmetric.encrypt(expectedPlaintext, key);
         String actualPlaintext = SimpleSymmetric.decrypt(cipherText, key);
 
-        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + expectedPlaintext + " contains expected plain text: " +
-                actualPlaintext);
+        assertEquals(actualPlaintext, expectedPlaintext, "Actual plain text: " + actualPlaintext + " contains expected plain text: " +
+                expectedPlaintext);
     }
 }

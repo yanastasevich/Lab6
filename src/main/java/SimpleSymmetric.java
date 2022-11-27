@@ -1,7 +1,6 @@
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -14,88 +13,68 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 public class SimpleSymmetric {
     public static void main(String[] args) throws Exception {
 
-        String inputString = "This is a test message.";
-        Charset charset = StandardCharsets.US_ASCII;
-        byte[] input = inputString.getBytes(charset);
+        String inputString = "There was a leak in the boat. Nobody had yet noticed it, and nobody would for the next couple of hours.";
 
-        // from moodle forum suggestion
-        String keyString = "testkey";
-
-        String cipherString = "70ce735916f59447ef721b8cb0bf8cf66fbb29c0ef97ab714bb3a4630dabcc74";
-
-        byte[] cipherInput = hexToByteArray(cipherString);
+        String keyString = "celebration";
 
         System.out.println("key: " + keyString);
 
         // decryption pass
 
-        encrypt(input, keyString);
-        decrypt(cipherInput, keyString);
+        String cipherString = encrypt(inputString, keyString);
+        decrypt(cipherString, keyString);
     }
 
-    // method for converting hex to byte array using parseInt()
-    // https://www.geeksforgeeks.org/java-program-to-convert-hex-string-to-byte-array/
-    private static byte[] hexToByteArray(String hex) {
-        byte[] data = new byte[hex.length() / 2];
 
-        for (int i = 0; i < data.length; i++) {
-            int index = i * 2;
-            int val = Integer.parseInt(hex.substring(index, index + 2), 16);
-            data[i] = (byte) val;
-        }
+    static String encrypt(String plainTextString, String key) throws InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+        Charset charset = StandardCharsets.US_ASCII;
+        byte[] plainTextBytes = plainTextString.getBytes(charset);
 
-        return data;
-    }
-
-    private static String encrypt(byte[] input, String key) throws InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
-        Security.addProvider(new BouncyCastleProvider());
-
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding", "BC");
+        Cipher cipher = getCipherForAProvider("BC");
         byte[] keyBytes = encodeKeys(key);
-        Security.addProvider(new BouncyCastleProvider());
+        initializeCipher(cipher, keyBytes, Cipher.ENCRYPT_MODE);
 
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-
-
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-
-        byte[] cipherText = new byte[cipher.getOutputSize(input.length)];
-
-        int ctLength = cipher.update(input, 0, input.length, cipherText, 0);
+        byte[] cipherText = new byte[cipher.getOutputSize(plainTextBytes.length)];
+        int ctLength = cipher.update(plainTextBytes, 0, plainTextBytes.length, cipherText, 0);
 
         ctLength += cipher.doFinal(cipherText, ctLength);
 
         System.out.println("cipher text: " + Utils.toHex(cipherText) + " bytes: " + ctLength);
-        System.out.println("");
-
 
         return Utils.toHex(cipherText);
     }
 
-    public static String decrypt(byte[] cipherText, String keyString) throws ShortBufferException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
-        Security.addProvider(new BouncyCastleProvider());
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding", "BC");
-        Charset charset = StandardCharsets.US_ASCII;
+    public static String decrypt(String cipherTextString, String keyString) throws ShortBufferException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+        byte[] cipherTextBytes = Utils.stringToBytes(cipherTextString);
+
+        Cipher cipher = getCipherForAProvider("BC");
         byte[] keyBytes = encodeKeys(keyString);
+        initializeCipher(cipher, keyBytes, Cipher.DECRYPT_MODE);
 
 
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-
-        cipher.init(Cipher.DECRYPT_MODE, keySpec);
-
-        byte[] plainText = new byte[cipherText.length];
-
-        int ptLength = cipher.update(cipherText, 0, cipherText.length, plainText, 0);
+        byte[] plainText = new byte[cipherTextBytes.length];
+        int ptLength = cipher.update(cipherTextBytes, 0, cipherTextBytes.length, plainText, 0);
 
         ptLength += cipher.doFinal(plainText, ptLength);
 
+        Charset charset = StandardCharsets.US_ASCII;
         String plainTextString = new String(plainText, charset);
-
         System.out.println("plain text : " + plainTextString + " bytes: " + ptLength);
 
-        return plainTextString;
+        return plainTextString.trim();
     }
 
+    private static Cipher getCipherForAProvider(String provider) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
+        Security.addProvider(new BouncyCastleProvider());
+        return Cipher.getInstance("AES/ECB/PKCS5Padding", provider);
+    }
+
+    private static void initializeCipher(Cipher cipher, byte[] keyBytes, int mode) throws InvalidKeyException {
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+        cipher.init(mode, keySpec);
+    }
+
+    // method contents from suggestion by Paul Klingberg on Moodle
     public static byte[] encodeKeys(String key) throws NoSuchAlgorithmException {
         Charset charset = StandardCharsets.US_ASCII;
         MessageDigest keySHA256 = MessageDigest.getInstance("SHA-256");
