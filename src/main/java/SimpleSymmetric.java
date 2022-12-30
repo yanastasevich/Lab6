@@ -40,7 +40,6 @@ public class SimpleSymmetric
 
         byte[] cipherInput = HexToByteArray(cipherString);
 
-
         //SecretKeySpec key = new SecretKeySpec(pbeKey.getEncoded(), "AES");
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
 
@@ -48,7 +47,7 @@ public class SimpleSymmetric
 
         Security.addProvider(new BouncyCastleProvider());
 
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding", "BC");
+        Cipher cipher = Cipher.getInstance("Blowfish/ECB/PKCS5Padding", "BC");
 
         System.out.println("input text : " + inputString);
 
