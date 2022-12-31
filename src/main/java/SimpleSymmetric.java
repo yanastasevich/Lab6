@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -7,6 +8,10 @@ import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -27,6 +32,82 @@ public class SimpleSymmetric {
 
         String cipherString = encrypt(inputString, keyString);
         decrypt(cipherString, keyString);
+
+        ArrayList<ArrayList<String>> sortedDictionary = sortDictionaryByCharacterLength();
+
+        System.out.println(decipherMessageWithoutKey(cipherString, sortedDictionary));
+    }
+
+    public static String decipherMessageWithoutKey (String ciphertext, ArrayList<ArrayList<String>> words) throws IOException, ShortBufferException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
+        String plaintext = "";
+        String key = "";
+
+        for (int i = 0; i <= ciphertext.length(); i++) {
+            for (int j = 2; j <= 15; j++) {
+                // special case for a as single character letter
+                for (String word:
+                     words.get(0)) {
+                    String possibleTranslation;
+                    try {
+                        possibleTranslation = decrypt(ciphertext.substring(0, j), word);
+                    } catch (Error error) {
+                        continue;
+                    }
+                    ArrayList<String> correctLengthWords = words.get(possibleTranslation.length());
+                    boolean isWord = isActualWord(possibleTranslation, correctLengthWords);
+                if (isWord) {
+                    if (decipherMessageWithKey(ciphertext.substring(j), word, words)) return word;
+                }
+                }
+            }
+        }
+        return "No solution!";
+    }
+
+    public static Boolean decipherMessageWithKey (String ciphertext, String key, ArrayList<ArrayList<String>> words) throws IOException, ShortBufferException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
+        for (int i = 0; i <= ciphertext.length(); i++) {
+            for (int j = 2; j <= 15; j++) {
+                // special case for a as single character letter
+                    String possibleTranslation = decrypt(ciphertext.substring(0, j), key);
+                    ArrayList<String> correctLengthWords = words.get(possibleTranslation.length());
+                    boolean isWord = isActualWord(possibleTranslation, correctLengthWords);
+                    if (isWord) {
+                        if (decipherMessageWithKey(ciphertext.substring(j), key, words)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static Boolean isActualWord(String checkWord, ArrayList<String> words) {
+        for (String word:
+             words) {
+            if (word == checkWord) return true;
+        }
+        return false;
+    }
+
+    public static ArrayList<ArrayList<String>> sortDictionaryByCharacterLength() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("words.txt"));
+
+        ArrayList<ArrayList<String>> sortedWords = new ArrayList<>();
+        for (int i = 1; i <= 30; i++) {
+            sortedWords.add(new ArrayList<String>());
+        }
+
+        try {
+            String word;
+            while ((word = br.readLine()) != null) {
+                ArrayList<String> wordList = sortedWords.get(word.length());
+                // System.out.println(word+" added to " + word.length() + "..." + sortedWords.get(word.length()));
+                sortedWords.get(0).add(word);
+                sortedWords.get(word.length()).add(word);
+                // System.out.println("Updated to "+ sortedWords.get(word.length()));
+            }
+        } finally {
+            br.close();
+        }
+        return sortedWords;
     }
 
     public static String getRandomWordFromDictionary() throws IOException {
